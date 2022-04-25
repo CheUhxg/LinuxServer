@@ -1,0 +1,3 @@
+/home/cheuhxg/CLionProjects/LinuxServer/cgiserver/cmake-build-debug/CMakeFiles/cgiserver.dir
+/home/cheuhxg/CLionProjects/LinuxServer/cgiserver/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/cheuhxg/CLionProjects/LinuxServer/cgiserver/cmake-build-debug/CMakeFiles/rebuild_cache.dir
