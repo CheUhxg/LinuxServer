@@ -6,6 +6,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#define MSG_BLOCKS 16
+#define MSG_LENGTH 16
+
 void client(const char* ip, const short port);
 void server(const char* ip, const short port);
 
@@ -31,16 +34,17 @@ void client(const char* ip, const short port) {
   int sock = socket(PF_INET, SOCK_DGRAM, 0);
   assert(sock >= 0);
 
-  char buffer[] = "UDP message";
-  iovec msg_iov = {
-          buffer,
-          sizeof(buffer)
-  };
+  char buffer[MSG_LENGTH] = "UDP message";
   msghdr msg{0};
   msg.msg_name = &addr;
   msg.msg_namelen = sizeof(addr);
-  msg.msg_iov = &msg_iov;
-  msg.msg_iovlen = 1;
+  iovec msg_iov[MSG_BLOCKS];
+  for(int i = 0; i < MSG_BLOCKS; ++i) {
+    msg_iov[i].iov_base = buffer;
+    msg_iov[i].iov_len = sizeof(buffer);
+  }
+  msg.msg_iov = msg_iov;
+  msg.msg_iovlen = MSG_BLOCKS;
   int send_bytes = sendmsg(sock, &msg, 0);
   printf("Client send %d bytes\n", send_bytes);
 
@@ -63,19 +67,22 @@ void server(const char* ip, const short port) {
   int ret = bind(sock, (sockaddr *) &addr, sizeof(addr));
   assert(ret >= 0);
 
-  char buffer[] = "12345678910";
-  iovec msg_iov = {
-          buffer,
-          sizeof(buffer)
-  };
+  char buffer[MSG_LENGTH];
   msghdr msg{0};
   msg.msg_name = &addr;
   msg.msg_namelen = sizeof(addr);
-  msg.msg_iov = &msg_iov;
-  msg.msg_iovlen = 1;
+  iovec msg_iov[MSG_BLOCKS];
+  msg.msg_iov = msg_iov;
+  msg.msg_iovlen = MSG_BLOCKS;
+  for(int i = 0; i < MSG_BLOCKS; ++i) {
+    msg_iov[i].iov_base = buffer;
+    msg_iov[i].iov_len = sizeof(buffer);
+  }
   int recv_bytes = recvmsg(sock, &msg, 0);
-  printf("Server recv %d bytes: %s\n",
-         recv_bytes, static_cast<char *>(msg.msg_iov->iov_base));
+  printf("Server recv %d bytes:\n", recv_bytes);
+  for(int i = 0; i < MSG_BLOCKS; ++i) {
+    printf("%s\n", static_cast<char *>(msg.msg_iov[i].iov_base));
+  }
 
   socklen_t sock_len;
   ret = getsockname(sock, (sockaddr *) &addr, &sock_len);
