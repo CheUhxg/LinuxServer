@@ -14,7 +14,7 @@ void server(const char* ip, const short port);
 
 int main(int argc, char* argv[]) {
   if(argc != 4) {
-    printf("Usage: %s [-c | -s] <ip> <port>\n", argv[0]);
+    printf("Usage: %s [-c | -s] <ip> <port>\n", basename(argv[0]));
     return 1;
   }
   if(strcmp(argv[1], "-c") == 0) {
